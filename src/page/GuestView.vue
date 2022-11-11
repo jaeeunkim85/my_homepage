@@ -4,8 +4,8 @@
       class="q-ma-md q-gutter-sm row justify-between"
       style="max-width: 600px"
     >
-      <q-input outlined v-model="userName" label="name" />
-      <q-input outlined v-model="userPass" type="password" label="pass" />
+      <q-input v-model="userName" label="name" />
+      <q-input v-model="userPass" type="password" label="pass" />
     </div>
     <div class="q-pa-md q-gutter-sm" style="max-width: 800px">
       <q-editor
@@ -81,7 +81,7 @@
           <q-btn flat label="Cancel" v-close-popup />
           <q-btn
             flat
-            label="Add address"
+            label="Delete"
             v-close-popup
             @click="commentDelete(pass)"
           />
@@ -109,6 +109,7 @@
 
 <script>
 import { ref } from "vue";
+
 export default {
   setup() {
     let commentList = ref([]);

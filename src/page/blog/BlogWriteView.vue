@@ -79,10 +79,11 @@
 </template>
 
 <script>
-import { onMounted, ref, watch, reactive } from "vue";
+import { ref } from "vue";
+import Api from "../../api/Api";
 export default {
   setup() {
-    let editor = ref("--------");
+    let editor = ref("");
     let fileadd = ref("");
 
     function savecontents(save) {
@@ -100,25 +101,32 @@ export default {
       input.type = "file";
       input.accept = ".png, .jpg"; // file extensions allowed
       let file;
-      input.onchange = (_) => {
+      input.onchange = async (_) => {
         const files = Array.from(input.files);
         file = files[0];
+        let formData = new FormData();
+        formData.append("files", file);
 
-        // lets load the file as dataUrl
-        const reader = new FileReader();
-        let dataUrl = "";
-        reader.onloadend = function () {
-          dataUrl = reader.result;
-
-          // append result to the body of your post
+        // 여기서 파일을 서버로 업로드 해서 url  받아서 사용하는 평식으로 바꿀수 있을것 같은데...
+        // 추가 확인이 필요하다.
+        Api.testapi();
+        console.log(formData);
+        let result = await Api.boardImageFiles(formData);
+        console.log(result);
+        if (result.data.statusCode === 200) {
+          const imageData = result.data.data;
+          console.log(imageData);
           editor.value =
-            editor.value + '<div><img src="' + dataUrl + '" /></div>';
-        };
+            editor.value +
+            '<div><img src="' +
+            imageData.filePullPath +
+            '" /></div>';
+        }
         console.log(editor);
-        reader.readAsDataURL(file);
       };
       input.click();
     }
+
     return {
       savecontents,
       insertImg,
