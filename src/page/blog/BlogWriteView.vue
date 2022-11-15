@@ -2,6 +2,13 @@
   <q-page-container>
     <div class="q-pa-md q-gutter-md" style="max-width: 800px">
       <q-input v-model="inputTitle" label="title" />
+      <div style="max-width: 300px">
+        <q-select
+          v-model="select"
+          :options="optionList"
+          label="Select Category"
+        />
+      </div>
       <q-editor
         v-model="editor"
         style="min-height: 500px; max-height: 800px"
@@ -85,14 +92,69 @@ export default {
   setup() {
     let editor = ref("");
     let fileadd = ref("");
+    let select = ref("");
+    let inputTitle = ref("");
+    let optionList = ref([]);
+    let imageName = "";
+    let fileList = [];
 
-    function savecontents(save) {
+    async function savecontents(save) {
       if (save === 0) {
         console.log(editor.value);
+
+        let saveContent = new FormData();
+        let body = `{ "title":"${inputTitle.value}",
+                "content" : ${JSON.stringify(editor.value)},
+                "category" : "${select.value}",
+                "imageName" : "${imageName}"
+            }`;
+        console.log("---save.....");
+        console.log(body);
+
+        saveContent.append("blogInfo", body);
+        // if (this.fileList.length > 0) {
+        //   this.fileList.forEach((file) => {
+        //     console.log("file name " + file.name);
+        //     saveContent.append("fileList", file);
+        //   });
+        // }
+
+        let result = await Api.createBlog(saveContent);
+        if (result.data.statusCode === 200) {
+          editor.value = "";
+          inputTitle.value = "";
+          select.value = "";
+        }
       } else {
         editor.value = "";
       }
     }
+
+    function fileChange(event) {
+      const files = event.target.files;
+      this.addFiles(files);
+    }
+    async function addFiles(files) {
+      for (let i = 0; i < files.length; i++) {
+        const src = await this.readFiles(files[i]);
+        files[i].src = src;
+        fileList.push(files[i]);
+      }
+    }
+
+    async function readFiles(files) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          resolve(e.target.result);
+        };
+        reader.readAsDataURL(files);
+      });
+    }
+    function handleRemove(index) {
+      this.fileList.splice(index, 1);
+    }
+
     function insertImg() {
       // insertImg method
       const post = this.post;
@@ -109,7 +171,6 @@ export default {
 
         // 여기서 파일을 서버로 업로드 해서 url  받아서 사용하는 평식으로 바꿀수 있을것 같은데...
         // 추가 확인이 필요하다.
-        Api.testapi();
         console.log(formData);
         let result = await Api.boardImageFiles(formData);
         console.log(result);
@@ -121,17 +182,36 @@ export default {
             '<div><img src="' +
             imageData.filePullPath +
             '" /></div>';
+          imageName = imageData.FileName;
         }
         console.log(editor);
       };
       input.click();
     }
 
+    async function getCategoryList() {
+      let result = await Api.getCategory();
+      if (result.data.statusCode === 200) {
+        let category = result.data.data;
+        category.forEach((item) => {
+          if (item.routerName != "write") {
+            optionList.value.push(item.categoryName);
+          }
+        });
+      }
+      console.log(optionList.value);
+    }
+    getCategoryList();
+
     return {
       savecontents,
       insertImg,
+      fileChange,
       editor,
       fileadd,
+      optionList,
+      select,
+      inputTitle,
     };
   },
 };

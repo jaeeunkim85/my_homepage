@@ -16,4 +16,17 @@ export default {
   testapi: () => {
     return httpClient.get(`/v1/file/test`);
   },
+
+  getCategory: () => {
+    return httpClient.get(`/v1/blog/category`);
+  },
+
+  createBlog: (body) => {
+    return httpClient.post(`/v1/blog/create`, body);
+  },
+  getCategoryList: (pageNo, pageSize, category) => {
+    return httpClient.get(
+      `/v1/blog/list?pageNo=${pageNo}&pageSize=${pageSize}&category=${category}`
+    );
+  },
 };

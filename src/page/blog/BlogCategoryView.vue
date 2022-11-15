@@ -7,15 +7,14 @@
         v-for="item in categoryList"
         :key="item.title"
       >
-        <img src="https://cdn.quasar.dev/img/mountains.jpg" />
-
         <q-card-section>
           <div class="text-h6">{{ item.title }}</div>
         </q-card-section>
 
-        <q-card-section>
-          {{ lorem }}
-        </q-card-section>
+        <q-card-section
+          v-html="item.content"
+          style="max-height: 100px; text-overflow: ellipsis; overflow: hidden"
+        />
       </q-card>
     </div>
     <q-pagination v-model="pageNumber" max="5" direction-links />
@@ -25,26 +24,38 @@
 <script>
 import { useRouter } from "vue-router";
 import { onMounted, ref, watch, reactive } from "vue";
+import Api from "../../api/Api";
 export default {
   setup() {
     const route = useRouter();
     const categoryName = ref("");
     let pageNumber = ref(1);
-    const categoryList = reactive([
-      { title: "title 1", content: "content1" },
-      { title: "title 2", content: "content2" },
-      { title: "title 3", content: "content3" },
-      { title: "title 4", content: "content4" },
-      { title: "title 5", content: "content5" },
-      { title: "title 6", content: "content6" },
-      { title: "title 7", content: "content7" },
-      { title: "title 8", content: "content8" },
-      { title: "title 9", content: "content9" },
-    ]);
+    const categoryList = reactive([]);
 
-    function setCatecoryName() {
+    async function setCatecoryName() {
+      categoryList.splice(0);
       console.log(route.currentRoute.value.params.category);
-      categoryName.value = route.currentRoute.value.params.category;
+
+      let result = await Api.getCategoryList(
+        1,
+        6,
+        route.currentRoute.value.params.category
+      );
+      if (result.data.statusCode === 200) {
+        let categorylist = result.data.data;
+        console.log(categorylist);
+        categorylist.forEach((item, index) => {
+          categoryList.push({
+            key: index,
+            title: item.title,
+            content: item.content,
+          });
+        });
+
+        console.log(categoryList);
+      } else {
+        console.log("error list...");
+      }
     }
 
     onMounted(() => {
@@ -64,8 +75,6 @@ export default {
       categoryName,
       categoryList,
       pageNumber,
-      lorem:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     };
   },
 };
