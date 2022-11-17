@@ -42,7 +42,10 @@ export default {
     function pagechange(place) {
       console.log(place);
       if (place === "write") {
-        router.push("/blog/" + place);
+        router.push({
+          name: "write",
+          params: { option: "write" },
+        });
       } else {
         router
           .push({

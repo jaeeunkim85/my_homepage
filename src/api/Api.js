@@ -29,4 +29,10 @@ export default {
       `/v1/blog/list?pageNo=${pageNo}&pageSize=${pageSize}&category=${category}`
     );
   },
+  getBlogDetail: (id) => {
+    return httpClient.get(`/v1/blog/${id}`);
+  },
+  editBlog: (body) => {
+    return httpClient.post(`/v1/blog/edit`, body);
+  },
 };

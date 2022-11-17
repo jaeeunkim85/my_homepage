@@ -27,9 +27,14 @@ const routes = [
         component: () => import("@/page/blog/BlogLanding.vue"),
       },
       {
-        path: "write",
+        path: "write/:option",
         name: "write",
         component: () => import("@/page/blog/BlogWriteView.vue"),
+      },
+      {
+        path: "detail/:id",
+        name: "detail",
+        component: () => import("@/page/blog/BlogDetailView.vue"),
       },
       {
         path: "category/:category",

@@ -1,11 +1,12 @@
 <template>
   <div class="q-pa-lg">
-    <h3>{{ categoryName }}</h3>
     <div class="row card_container">
       <q-card
         class="my-card q-ma-sm"
         v-for="item in categoryList"
         :key="item.title"
+        @click="clickDetailpage(item.id)"
+        style="cursor: pointer"
       >
         <q-card-section>
           <div class="text-h6">{{ item.title }}</div>
@@ -49,6 +50,7 @@ export default {
             key: index,
             title: item.title,
             content: item.content,
+            id: item.id,
           });
         });
 
@@ -56,6 +58,15 @@ export default {
       } else {
         console.log("error list...");
       }
+    }
+
+    function clickDetailpage(id) {
+      route
+        .push({
+          name: "detail",
+          params: { id: id },
+        })
+        .catch(() => {});
     }
 
     onMounted(() => {
@@ -75,6 +86,7 @@ export default {
       categoryName,
       categoryList,
       pageNumber,
+      clickDetailpage,
     };
   },
 };

@@ -11,13 +11,83 @@
       </div>
       <q-editor
         v-model="editor"
-        style="min-height: 500px; max-height: 800px"
+        style="min-height: 500px"
         :toolbar="[
-          ['left', 'center', 'right', 'justify'],
-          ['bold', 'italic', 'underline', 'strike'],
+          [
+            {
+              label: $q.lang.editor.align,
+              icon: $q.iconSet.editor.align,
+              fixedLabel: true,
+              list: 'only-icons',
+              options: ['left', 'center', 'right', 'justify'],
+            },
+            {
+              label: $q.lang.editor.align,
+              icon: $q.iconSet.editor.align,
+              fixedLabel: true,
+              options: ['left', 'center', 'right', 'justify'],
+            },
+          ],
+          ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
+          ['token', 'hr', 'link', 'custom_btn'],
+          ['print', 'fullscreen'],
+          [
+            {
+              label: $q.lang.editor.formatting,
+              icon: $q.iconSet.editor.formatting,
+              list: 'no-icons',
+              options: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code'],
+            },
+            {
+              label: $q.lang.editor.fontSize,
+              icon: $q.iconSet.editor.fontSize,
+              fixedLabel: true,
+              fixedIcon: true,
+              list: 'no-icons',
+              options: [
+                'size-1',
+                'size-2',
+                'size-3',
+                'size-4',
+                'size-5',
+                'size-6',
+                'size-7',
+              ],
+            },
+            {
+              label: $q.lang.editor.defaultFont,
+              icon: $q.iconSet.editor.font,
+              fixedIcon: true,
+              list: 'no-icons',
+              options: [
+                'default_font',
+                'arial',
+                'arial_black',
+                'comic_sans',
+                'courier_new',
+                'impact',
+                'lucida_grande',
+                'times_new_roman',
+                'verdana',
+              ],
+            },
+            'removeFormat',
+          ],
+          ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
+
           ['undo', 'redo'],
-          ['insert_img'],
+          ['viewsource', 'insert_img'],
         ]"
+        :fonts="{
+          arial: 'Arial',
+          arial_black: 'Arial Black',
+          comic_sans: 'Comic Sans MS',
+          courier_new: 'Courier New',
+          impact: 'Impact',
+          lucida_grande: 'Lucida Grande',
+          times_new_roman: 'Times New Roman',
+          verdana: 'Verdana',
+        }"
         :definitions="{
           bold: { label: 'Bold', icon: null, tip: 'My bold tooltip' },
           insert_img: {
@@ -86,8 +156,10 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { useRouter } from "vue-router";
 import Api from "../../api/Api";
+import { onMounted, ref, watch, reactive } from "vue";
+import router from "../../router/router";
 export default {
   setup() {
     let editor = ref("");
@@ -97,36 +169,52 @@ export default {
     let optionList = ref([]);
     let imageName = "";
     let fileList = [];
+    const route = useRouter();
+    let editorOption;
 
     async function savecontents(save) {
       if (save === 0) {
         console.log(editor.value);
 
         let saveContent = new FormData();
-        let body = `{ "title":"${inputTitle.value}",
+
+        if (editorOption === "write") {
+          let body = `{ "title":"${inputTitle.value}",
                 "content" : ${JSON.stringify(editor.value)},
                 "category" : "${select.value}",
                 "imageName" : "${imageName}"
             }`;
-        console.log("---save.....");
-        console.log(body);
+          console.log(body);
+          saveContent.append("blogInfo", body);
+          let result = await Api.createBlog(saveContent);
 
-        saveContent.append("blogInfo", body);
+          if (result.data.statusCode === 200) {
+            editor.value = "";
+            inputTitle.value = "";
+            select.value = "";
+          }
+        } else {
+          let body = `{ "title":"${inputTitle.value}",
+                "content" : ${JSON.stringify(editor.value)},
+                "category" : "${select.value}",
+                "imageName" : "${imageName}",
+                "id" : ${editorOption}
+            }`;
+          console.log(body);
+          saveContent.append("blogEditInfo", body);
+          let result = await Api.editBlog(saveContent);
+
+          if (result.data.statusCode === 200) {
+            router.go(-1);
+          }
+        }
         // if (this.fileList.length > 0) {
         //   this.fileList.forEach((file) => {
         //     console.log("file name " + file.name);
         //     saveContent.append("fileList", file);
         //   });
         // }
-
-        let result = await Api.createBlog(saveContent);
-        if (result.data.statusCode === 200) {
-          editor.value = "";
-          inputTitle.value = "";
-          select.value = "";
-        }
       } else {
-        editor.value = "";
       }
     }
 
@@ -163,6 +251,7 @@ export default {
       input.type = "file";
       input.accept = ".png, .jpg"; // file extensions allowed
       let file;
+
       input.onchange = async (_) => {
         const files = Array.from(input.files);
         file = files[0];
@@ -201,7 +290,38 @@ export default {
       }
       console.log(optionList.value);
     }
+
+    async function editBlogDetail(id) {
+      console.log(id);
+      let response = await Api.getBlogDetail(id);
+      if (response.data.statusCode === 200) {
+        let blogData = response.data.data;
+        inputTitle.value = blogData.title;
+        editor.value = blogData.content;
+        select.value = blogData.categoryName;
+      }
+    }
     getCategoryList();
+
+    onMounted(() => {
+      console.log(route.currentRoute.value.params.option);
+      editorOption = route.currentRoute.value.params.option;
+      if (editorOption === "write") {
+        inputTitle.value = "";
+        editor.value = "";
+        select.value = "";
+      } else {
+        editBlogDetail(editorOption);
+      }
+    });
+
+    watch(
+      //카테고리 변경사항을 감지하기 위해 코드 삽입.
+      () => route.currentRoute.value.params.option,
+      () => {
+        // testfunction();
+      }
+    );
 
     return {
       savecontents,
