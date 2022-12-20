@@ -8,8 +8,8 @@
         @click="clickDetailpage(item.id)"
         style="cursor: pointer"
       >
-        <q-card-section>
-          <div class="text-h6">{{ item.title }}</div>
+        <q-card-section style="background-color: #1976d2; max-height: 80px">
+          <div class="text-h7" style="color: white">{{ item.title }}</div>
         </q-card-section>
 
         <q-card-section
@@ -18,7 +18,13 @@
         />
       </q-card>
     </div>
-    <q-pagination v-model="pageNumber" max="5" direction-links />
+    <q-pagination
+      class="q-mt-md"
+      v-model="pageNumber"
+      max="5"
+      direction-links
+      :to-fn="changePagaeNumber(pageNumber)"
+    />
   </div>
 </template>
 
@@ -26,6 +32,8 @@
 import { useRouter } from "vue-router";
 import { onMounted, ref, watch, reactive } from "vue";
 import Api from "../../api/Api";
+
+
 export default {
   setup() {
     const route = useRouter();
@@ -38,7 +46,7 @@ export default {
       console.log(route.currentRoute.value.params.category);
 
       let result = await Api.getCategoryList(
-        1,
+        pageNumber.value,
         6,
         route.currentRoute.value.params.category
       );
@@ -69,6 +77,10 @@ export default {
         .catch(() => {});
     }
 
+    function changePagaeNumber() {
+      console.log(pageNumber.value);
+    }
+
     onMounted(() => {
       console.log("onMounted....");
     });
@@ -77,16 +89,17 @@ export default {
       //카테고리 변경사항을 감지하기 위해 코드 삽입.
       () => route.currentRoute.value.params.category,
       () => {
+        console.log(route.currentRoute.value.params.category);
         setCatecoryName();
       }
     );
-
     setCatecoryName();
     return {
       categoryName,
       categoryList,
       pageNumber,
       clickDetailpage,
+      changePagaeNumber,
     };
   },
 };

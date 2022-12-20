@@ -35,4 +35,34 @@ export default {
   editBlog: (body) => {
     return httpClient.post(`/v1/blog/edit`, body);
   },
+
+  saveGuest: (body) => {
+    return httpClient.post(`/v1/guest`, body);
+  },
+
+  getGuestList: (pageNo, pageSize) => {
+    return httpClient.get(
+      `/v1/guest/guestlist?pageNo=${pageNo}&pageSize=${pageSize}`
+    );
+  },
+
+  updateGuestComment: (body) => {
+    return httpClient.post(`/v1/guest/updateComment`, body);
+  },
+
+  deleteGuest: (body) => {
+    return httpClient.post(`/v1/guest/deleteguest`, body);
+  },
+
+  updateGuest: (body) => {
+    return httpClient.post(`/v1/guest/update`, body);
+  },
+
+  logining: () => {
+    return httpClient.get(`/login/main`);
+  },
+
+  signupProcess: (body) => {
+    return httpClient.post(`/v1/login/signup`, body);
+  },
 };

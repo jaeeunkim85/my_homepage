@@ -9,8 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@apollo/client": "^3.7.2",
     "@quasar/extras": "^1.15.5",
+    "@vue/apollo-composable": "*",
     "axios": "^1.1.3",
+    "graphql": "^16.6.0",
+    "graphql-tag": "^2.12.6",
     "quasar": "^2.10.1",
     "vue": "^3.2.41",
     "vue-router": "4",

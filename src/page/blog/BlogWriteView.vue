@@ -208,12 +208,6 @@ export default {
             router.go(-1);
           }
         }
-        // if (this.fileList.length > 0) {
-        //   this.fileList.forEach((file) => {
-        //     console.log("file name " + file.name);
-        //     saveContent.append("fileList", file);
-        //   });
-        // }
       } else {
       }
     }

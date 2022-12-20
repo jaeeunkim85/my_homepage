@@ -11,21 +11,6 @@ class HttpClient {
         "X-Requested-With": "XMLHttpRequest",
       },
     });
-    this.axiosInstance.interceptors.response.use(
-      (response) => this.responseHandler(response),
-      async (error) => {
-        console.log("error.response.status " + error.response.status);
-        if (
-          error.response &&
-          error.response.status === 400 &&
-          error.response.data.message === "."
-        ) {
-          //sessionStorage.clear();
-          //location.replace("/");
-        }
-        throw error;
-      }
-    );
   }
 
   responseHandler = async (response) => {
